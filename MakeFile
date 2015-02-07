@@ -9,7 +9,7 @@ babycpp: driver_main.o lex.yy.o hashtbl.o
 lex.yy.o: lex.yy.c
 	$(CC) $(CCFLAGS) lex.yy.c
 
-driver_main.o: main.c defs.h 
+driver_main.o: driver_main.c defs.h 
 	$(CC) $(CCFLAGS) main.c
 
 hashtbl.o: hashtbl.c defs.h
