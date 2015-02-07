@@ -1,2 +1,2 @@
 # CSCE531
-Learning to use the lexical analyzer
+Learning to use the lexical analyzer Flex
