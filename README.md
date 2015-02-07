@@ -1,2 +1,2 @@
 # CSCE531
-Test Lexical analyzer
+Learning to use the lexical analyzer
