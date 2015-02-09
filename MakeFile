@@ -19,4 +19,4 @@ lex.yy.c: analyzer.lex defs.h
 	$(LEX) analyzer.lex  
 
 clean: 
-	rm *.o lex.yy.c babycpp 
+	rm *.o lex.yy.c babycpp *.txt
