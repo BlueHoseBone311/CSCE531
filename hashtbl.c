@@ -5,7 +5,7 @@
 #include "defs.h"
 
 #define INITIAL_HASH_SIZE 8
-#define MAX_LOAD_FACTOR 2
+#define MAX_LOAD_FACTOR 0.75
 #define SCALE_FACTOR 4
 
 static DR get_item(const char *key);
@@ -37,10 +37,18 @@ void add_int_to_dict(const char *key, long val)
     entry->key = key;
     entry->tag = INT_CONST;
     entry->u.intconstval = val;
-    if (insert_or_update(entry) == 0)
+    if (insert_or_update(entry, hash_tab) == 0)
     {    
         fprintf(stderr, "Warning: redefinition of %s to %ld at line %d\n",key, val, line_no);
-    }    
+    }  
+    else
+    {
+        ++num_items;
+        if (num_items/h_size>MAX_LOAD_FACTOR)
+       {
+            resize(h_size*SCALE_FACTOR);
+       }  
+    }  
 }
 
 // Add a key with a string constant value to the dictionary
@@ -51,10 +59,18 @@ void add_str_to_dict(const char *key, const char *val)
     entry->key = key;
     entry->tag = STR_CONST;
     entry->u.strconstval = val;
-    if (insert_or_update(entry) == 0)
+    if (insert_or_update(entry, hash_tab) == 0)
     {    
         fprintf(stderr, "Warning: redefinition of %s to %ld at line %d\n",key, val, line_no);
     }
+    else
+    {
+        ++num_items; 
+        if (num_items/h_size>MAX_LOAD_FACTOR)
+       {
+            resize(h_size*SCALE_FACTOR);
+       }  
+    }    
 }
 
 // Add a key with an identifier value to the dictionary
@@ -65,9 +81,17 @@ void add_id_to_dict(const char *key, const char *val)
     entry->key = key;
     entry->tag = INT_CONST;
     entry->u.idval = val;
-    if (insert_or_update(entry) == 0)
+    if (insert_or_update(entry, hash_tab) == 0)
     {    
         fprintf(stderr, "Warning: redefinition of %s to %ld at line %d\n",key, val, line_no);
+    }    
+    else
+    {
+        ++num_items; 
+        if ((num_items/h_size)>MAX_LOAD_FACTOR)
+       {
+            resize(h_size*SCALE_FACTOR);
+       }  
     }    
 }
 
@@ -97,11 +121,15 @@ int insert_or_update(DR new_item, DR *table);
 {
     int status = 0;
     int index = hash(new_item->key);
-    char * id_val = ID; 
+    char *id_val = ID; 
     DR *curr_item;
 
-    if ((curr_item = get_item(new_item->key)) != NULL) /*a key exists that is the same as the new item*/
+    if ((curr_item = get_item(new_item->key)) != NULL) /*a key exists that is the same as the new item - update data*/
     {
+        if (curr_item->incycle)
+        {
+            unmark_cycle(curr_item);
+        }    
         cur_item->tag = new_item->tag
         cur_item->u = new_item->u;
         if (strcmp(curr_item->tag,id_val) == 0)
@@ -118,11 +146,6 @@ int insert_or_update(DR new_item, DR *table);
        {
             check_or_mark_cycle(new_item);  
        }
-       ++num_items;
-       if (num_items/h_size>MAX_LOAD_FACTOR)
-       {
-            resize(h_size*SCALE_FACTOR)
-       } 
        status = 1; 
     }
     else /*a key exists but it is not the same as the new_item key - add to end*/
@@ -137,17 +160,12 @@ int insert_or_update(DR new_item, DR *table);
         {
             check_or_mark_cycle(curr_item);  
         }
-        ++num_items; 
-        if (num_items/h_size>MAX_LOAD_FACTOR)
-       {
-            resize(h_size*SCALE_FACTOR)
-       } 
         status = 1;     
     }
 
     return status;   
 }
-boolean check_cycle (DR item, char* key)
+boolean check_cycle (DR item, const char* key)
 {
     char * int_val = INT_CONST;
     char * str_val = STR_CONST; 
@@ -156,7 +174,7 @@ boolean check_cycle (DR item, char* key)
     {
         return FALSE;
     } 
-    if (item->u.idval)
+    if (strcmp(item->u.idval, key))
     {
         return TRUE; 
     }
@@ -177,8 +195,17 @@ int hash(const char *key)
         
     return sum;
 }
-void insert_at_front(DR *list, DR new_item);
-DR remove_from_front(DR *list);
+void insert_at_front(DR *list, DR new_item)
+{
+    new_item-> next = *list; 
+    *list = new_item; 
+}
+DR remove_from_front(DR *list)
+{
+    DR entry = *list; 
+    *list = *list->next; 
+    return entry; 
+}
 void resize(int size)
 { 
     int temp = h_size; 
@@ -191,8 +218,7 @@ void resize(int size)
 
     if (hash_tab == NULL) /*initial dictionary*/
     {    
-        hash_tab = new_table;
-        free();     
+        hash_tab = new_table;    
     } 
     else
     {
@@ -204,6 +230,30 @@ void resize(int size)
                 insert_or_update(entry, new_table);
             }       
         } 
+        free_table(hash_tab, temp);
         hash_tab = new_table; 
     }       
+}
+void free_table(DR *hashtable, int tablesize)
+{
+    int i;
+    DR *entry, *temp;
+
+    if (hashtable==NULL) return;
+
+    for(i=0; i<tablesize; i++) 
+    {
+        entry = hashtable[i];
+        
+        while(entry!=NULL) {
+            temp = entry;
+            entry = entry->next;
+            free(temp->in_cycle);
+            free(temp->key);
+            free(temp->tag);
+            free(temp->u);
+            free (temp);
+        }
+    }
+    free(hashtable);
 }

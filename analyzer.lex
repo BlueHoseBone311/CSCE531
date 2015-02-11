@@ -1,5 +1,6 @@
 %{
 #include <math.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "defs.h"
@@ -23,9 +24,9 @@ val_str			\"[ \t_A-Za-z0-9@!]+\"
 	line_no = 0;
 %%
 \n 				  ++line_no;
-{directive}   		{
+{directive}   	{
 					define_flag = TRUE; printf("A directive has been discovered on line %d:\n", line_no);
-					}  
+				}  
 {identifier}	{ 
 				   if (define_flag && !key_flag) /*key identifier*/
 				   {
@@ -37,6 +38,7 @@ val_str			\"[ \t_A-Za-z0-9@!]+\"
 					else if (define_flag && key_flag) /*value identifier*/
 					{
 						printf("An identifier value: %s on line %d\n" ,yytext,line_no);
+						add_id_to_dict(key_str, yytext); 
 						define_flag = FALSE;
 						key_flag = FALSE;
 					}
@@ -49,6 +51,7 @@ val_str			\"[ \t_A-Za-z0-9@!]+\"
 					if (define_flag && key_flag)
 					{
 						printf("An integer constant: %s\n", yytext);
+						add_int_to_dict(key_str, atol(yytext));
 						define_flag = FALSE;
 						key_flag = FALSE;
 					}
@@ -60,6 +63,7 @@ val_str			\"[ \t_A-Za-z0-9@!]+\"
 						val_string = (char*)malloc(strlen(yytext)-1);
 						strncpy(val_string, &(yytext[1]), strlen(yytext)-2);
 						val_string[strlen(yytext)-2] = (char) 0;
+						add_str_to_dict(key_str, val_string);
 						printf("A string constant: %s on line %d\n", val_string, line_no);
 						define_flag = FALSE;
 						key_flag = FALSE; 
