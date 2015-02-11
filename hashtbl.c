@@ -6,7 +6,7 @@
 
 #define INITIAL_HASH_SIZE 8
 #define MAX_LOAD_FACTOR 2
-#define SCALE_FACTOR 2
+#define SCALE_FACTOR 4
 
 static DR get_item(const char *key);
 static int insert_or_update(DR new_item);
@@ -93,7 +93,7 @@ DR get_item(const char *key)
     return NULL; 
 }
 
-int insert_or_update(DR new_item);
+int insert_or_update(DR new_item, DR *table);
 {
     int status = 0;
     int index = hash(new_item->key);
@@ -109,21 +109,25 @@ int insert_or_update(DR new_item);
             check_or_mark_cycle(curr_item);  
         } 
     }
-    else if (hash_tab[index] = NULL) /*this bucket has not been hashed to - fill it */ 
+    else if (table[index] = NULL) /*this bucket has not been hashed to - fill it */ 
     {
        int hashval = hash(index);
-       new_item->next = hash_tab[hashval];
-       hash_tab[hashval] = new_item;
+       new_item->next = table[hashval];
+       table[hashval] = new_item;
        if (strcmp(new_item->tag,id_val) == 0)
        {
             check_or_mark_cycle(new_item);  
        }
-       ++num_items; 
+       ++num_items;
+       if (num_items/h_size>MAX_LOAD_FACTOR)
+       {
+            resize(h_size*SCALE_FACTOR)
+       } 
        status = 1; 
     }
     else /*a key exists but it is not the same as the new_item key - add to end*/
     {
-        DR *ptr = hash_tab[index];
+        DR *ptr = table[index];
         while(ptr->next != NULL)
         {
             ptr = ptr->next; 
@@ -134,10 +138,32 @@ int insert_or_update(DR new_item);
             check_or_mark_cycle(curr_item);  
         }
         ++num_items; 
+        if (num_items/h_size>MAX_LOAD_FACTOR)
+       {
+            resize(h_size*SCALE_FACTOR)
+       } 
         status = 1;     
     }
 
     return status;   
+}
+boolean check_cycle (DR item, char* key)
+{
+    char * int_val = INT_CONST;
+    char * str_val = STR_CONST; 
+     
+    if (strcmp(item->tag, int_val) == 0 || strcmp(item->tag, str_val) == 0)|| item->in_cycle)
+    {
+        return FALSE;
+    } 
+    if (item->u.idval)
+    {
+        return TRUE; 
+    }
+    DR *next_item;  
+    next_item = item->u.idval;
+    check_cycle(next_item,key);
+
 }
 void check_or_mark_cycle(DR item);
 void unmark_cycle(DR item);
@@ -155,26 +181,29 @@ void insert_at_front(DR *list, DR new_item);
 DR remove_from_front(DR *list);
 void resize(int size)
 { 
-    DR *new_table = (DR *) malloc(size*sizeof(DICT_REC)); 
+    int temp = h_size; 
+    h_size = size;
+    DR *new_table = (DR *) malloc(h_size*sizeof(DICT_REC)); 
+    for (int i = 0; i <h_size; i++)
+    {
+        new_table[i] = NULL;
+    }
 
     if (hash_tab == NULL) /*initial dictionary*/
-    { 
-        for (int i = 0; i <size; i++)
-        {
-           new_table[i] = NULL;
-        }
-        hash_tab = new_table; 
-        h_size = size; 
+    {    
+        hash_tab = new_table;
+        free();     
     } 
     else
     {
-        while(int i < h_size)
+        while(int i < temp)
         {
             DR *entry;
             for (entry = hash_tab[i]; entry != NULL; entry = entry->next)
             {   
-                hash(entry->key
+                insert_or_update(entry, new_table);
             }       
-        }    
+        } 
+        hash_tab = new_table; 
     }       
 }
