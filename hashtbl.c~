@@ -121,7 +121,7 @@ int insert_or_update(DR new_item, DR *table);
 {
     int status = 0;
     int index = hash(new_item->key);
-    int id_val = 2; 
+    int id_val = ID; 
     DR *curr_item;
 
     if ((curr_item = get_item(new_item->key)) != NULL) /*a key exists that is the same as the new item - update data*/
@@ -132,7 +132,7 @@ int insert_or_update(DR new_item, DR *table);
         }    
         cur_item->tag = new_item->tag
         cur_item->u = new_item->u;
-        if (curr_item->tag == id_val)
+        if (strcmp(curr_item->tag,id_val) == 0)
         {
             check_or_mark_cycle(curr_item);  
         } 
@@ -156,7 +156,7 @@ int insert_or_update(DR new_item, DR *table);
             ptr = ptr->next; 
         } 
         ptr->next = new_item;
-        if (ptr->tag == id_val)
+        if (strcmp(curr_item->tag,id_val) == 0)
         {
             check_or_mark_cycle(curr_item);  
         }
@@ -191,7 +191,8 @@ int hash(const char *key)
     for (; *key; key++)
     {    
         sum = (37*sum + *key) % h_size;
-    }      
+    }
+        
     return sum;
 }
 void insert_at_front(DR *list, DR new_item)
