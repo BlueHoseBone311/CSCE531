@@ -128,7 +128,7 @@ int insert_or_update(DR new_item, DR *table);
     {
         if (curr_item->incycle)
         {
-            unmark_cycle(curr_item);
+            unmark_cycle(curr_item, curr_item->key);
         }    
         cur_item->tag = new_item->tag
         cur_item->u = new_item->u;
@@ -142,7 +142,7 @@ int insert_or_update(DR new_item, DR *table);
        int hashval = hash(index);
        new_item->next = table[hashval];
        table[hashval] = new_item;
-       if (strcmp(new_item->tag,id_val) == 0)
+       if (new_item->tag == id_val)
        {
             check_or_mark_cycle(new_item);  
        }
@@ -150,10 +150,10 @@ int insert_or_update(DR new_item, DR *table);
     }
     else /*a key exists but it is not the same as the new_item key - add to end*/
     {
-        DR *ptr = table[index];
-        while(ptr->next != NULL)
+        DR entry = table[index];
+        while(entry->next != NULL)
         {
-            ptr = ptr->next; 
+            entry = entry->next; 
         } 
         ptr->next = new_item;
         if (ptr->tag == id_val)
@@ -165,26 +165,33 @@ int insert_or_update(DR new_item, DR *table);
 
     return status;   
 }
-boolean check_cycle (DR item, const char* key)
+void mark_cycle (DR item, const char *key)
 {
-    char * int_val = INT_CONST;
-    char * str_val = STR_CONST; 
+    int int_val = 0;
+    int str_val = 1; 
      
-    if (strcmp(item->tag, int_val) == 0 || strcmp(item->tag, str_val) == 0)|| item->in_cycle)
+    if (item->tag == int_val || item->tag == str_val) || item->in_cycle)
     {
-        return FALSE;
+        return;
     } 
     if (strcmp(item->u.idval, key))
     {
-        return TRUE; 
+	item.in_cycle = TRUE;
+	item = item->u.idval; 		
+        return; 
     }
     DR *next_item;  
     next_item = item->u.idval;
     check_cycle(next_item,key);
-
 }
-void check_or_mark_cycle(DR item);
-void unmark_cycle(DR item);
+void unmark_cycle(DR item, const char *key);
+{  
+    while(strcmp(item->u.idval, key) != 0)
+    {
+	item.in_cycle = FALSE;
+	item = item->u.idval; 		     	
+    }	
+}
 int hash(const char *key)
 {
     int sum = 0;
@@ -209,7 +216,7 @@ void resize(int size)
 { 
     int temp = h_size; 
     h_size = size;
-    DR *new_table = (DR *) malloc(h_size*sizeof(DICT_REC)); 
+    DR *new_table = (DR *) malloc(h_size*sizeof(DR)); 
     for (int i = 0; i <h_size; i++)
     {
         new_table[i] = NULL;
@@ -231,7 +238,7 @@ void resize(int size)
         } 
         free_table(hash_tab, temp);
         hash_tab = new_table; 
-    }       
+    }  
 }
 void free_table(DR *hashtable, int tablesize)
 {
