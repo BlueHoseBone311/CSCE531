@@ -77,9 +77,9 @@ void add_str_to_dict(const char *key, const char *val)
 void add_id_to_dict(const char *key, const char *val)
 {
     DR entry = (DR) malloc(sizeof(DICT_REC));
-    entry->in_cycle = FALSE; /*marked approprately once installed*/
+    entry->in_cycle = FALSE; /*marked approprately once added*/
     entry->key = key;
-    entry->tag = INT_CONST;
+    entry->tag = ID;
     entry->u.idval = val;
     if (insert_or_update(entry, hash_tab) == 0)
     {    
@@ -126,7 +126,7 @@ int insert_or_update(DR new_item, DR *table);
 
     if ((curr_item = get_item(new_item->key)) != NULL) /*a key exists that is the same as the new item - update data*/
     {
-        if (curr_item->incycle)
+        if (curr_item->in_cycle)
         {
             unmark_cycle(curr_item, curr_item->key);
         }    
@@ -148,7 +148,7 @@ int insert_or_update(DR new_item, DR *table);
             check_or_mark_cycle(curr_item);  
         } 
     }
-    else if (table[index] = NULL) /*this bucket has not been hashed to - fill it */ 
+    else if (table[index] == NULL) /*this bucket has not been hashed to - fill it */ 
     {
        int hashval = hash(index);
        new_item->next = table[hashval];
@@ -177,7 +177,7 @@ int insert_or_update(DR new_item, DR *table);
     return status;   
 }
 
-void mark_cycle (DR item, const char *key)
+void check_or_mark_cycle(DR item, const char *key)
 {
     int int_val = 0;
     int str_val = 1; 
@@ -199,7 +199,7 @@ void mark_cycle (DR item, const char *key)
     }
       
     item = item->u.idval;
-    check_cycle(item,key);
+    check_or_mark_cycle(item,key);
 }
 
 void unmark_cycle(DR item, const char *key);

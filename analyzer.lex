@@ -32,7 +32,7 @@ val_str			\".*\"
 				   {
 				   	 key_str = (char*)malloc(strlen(yytext)+1);
 				   	 strcpy(key_str,yytext); 	
-					 printf( "An identifier: %s on line: %d\n", key_str,line_no);
+					 printf("An identifier: %s on line: %d\n", key_str,line_no);
 					 key_flag = TRUE; 
 					}
 					else if (define_flag && key_flag) /*value identifier*/
