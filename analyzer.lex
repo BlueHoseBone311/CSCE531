@@ -11,7 +11,7 @@ int             {digit}+
 directive       "#""define"[ \t]+
 identifier      [_A-Za-z][_A-Za-z0-9]*
 val_int			[+-]?{int}
-val_str			\"\"
+val_str			\".*\"
 
 /* internal flag */
 	int define_flag = FALSE;
