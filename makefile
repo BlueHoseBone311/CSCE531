@@ -1,19 +1,19 @@
 CC = gcc
-CCFLAGS = -c
+CCFLAGS = -Wall -g -c
 LEX = flex
 TARGET = -o babycpp
 
-babycpp: lex.yy.o hashtbl.o 
-	$(CC) lex.yy.o hashtbl.o $(TARGET) -lfl
+babycpp: lex.yy.o dict.o 
+	$(CC) lex.yy.o dict.o $(TARGET) -lfl
 
 lex.yy.o: lex.yy.c
 	$(CC) $(CCFLAGS) lex.yy.c
 
-hashtbl.o: hashtbl.c defs.h
-	$(CC) $(CCFLAGS) hashtbl.c	
+dict.o: dict.c defs.h
+	$(CC) $(CCFLAGS) dict.c	
 
-lex.yy.c: analyzer.lex defs.h
-	$(LEX) analyzer.lex  
+lex.yy.c: driver.lex defs.h
+	$(LEX) driver.lex  
 
 clean: 
-	rm *.o lex.yy.c babycpp *.md
+	rm *.o lex.yy.c babycpp 

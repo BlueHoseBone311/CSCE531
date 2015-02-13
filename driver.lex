@@ -21,15 +21,15 @@ val_str			\".*\"
 	char * key_str;
 	char* val_string;
 
-	line_no = 0;
+	int line_no = 0;
 %%
 \n 				  ++line_no;
 {directive}   	{
 					define_flag = TRUE; 
 				}  
 {identifier}	{ 
-				   if (define_flag && !key_flag) /*key identifier*/
-				   {
+				        if (define_flag && !key_flag) /*key identifier*/
+				        {
 				   	 key_str = (char*)malloc(strlen(yytext)+1);
 				   	 strcpy(key_str,yytext); 	
 					 
@@ -37,13 +37,13 @@ val_str			\".*\"
 					}
 					else if (define_flag && key_flag) /*value identifier*/
 					{
-						add_id_to_dict(key_str, yytext); 
+						add_id_to_dict(key_str, yytext);  
 						define_flag = FALSE;
 						key_flag = FALSE;
 					}
 					else
 					{
-						/*consume anything else*/
+						output_substitution(yyout,yytext); 
 					}
 				 }					    
 {val_int}		{
@@ -68,9 +68,6 @@ val_str			\".*\"
 				}
 "{"[^}\n]*"}"    /* eat up one-line comments */
 
-[ \t]+         /*consume whitespace*/
-
-.              /*consume anything else*/  
 
 %%
 main( int argc, char **argv )
