@@ -10,8 +10,8 @@ digit           [0-9]
 int             {digit}+
 directive       "#""define"[ \t]+
 identifier      [_A-Za-z][_A-Za-z0-9]*
-val_int		[+-]?{int}
-val_str		\".*\"
+val_int			[+-]?{int}
+val_str			\".*\"
 
 /* internal flag */
 	int define_flag = FALSE;
@@ -21,7 +21,7 @@ val_str		\".*\"
 	char * key_str;
 	char* val_string;
 
-	int line_no = 1;
+	int line_no = 0;
 %%
 \n 				  ++line_no;
 {directive}   	{
