@@ -25,19 +25,18 @@ val_str			\".*\"
 %%
 \n 				  ++line_no;
 {directive}   	{
-					define_flag = TRUE; printf("A directive has been discovered on line %d:\n", line_no);
+					define_flag = TRUE; 
 				}  
 {identifier}	{ 
 				   if (define_flag && !key_flag) /*key identifier*/
 				   {
 				   	 key_str = (char*)malloc(strlen(yytext)+1);
 				   	 strcpy(key_str,yytext); 	
-					 printf("An identifier: %s on line: %d\n", key_str,line_no);
+					 
 					 key_flag = TRUE; 
 					}
 					else if (define_flag && key_flag) /*value identifier*/
 					{
-						printf("An identifier value: %s on line %d\n" ,yytext,line_no);
 						add_id_to_dict(key_str, yytext); 
 						define_flag = FALSE;
 						key_flag = FALSE;
@@ -50,7 +49,6 @@ val_str			\".*\"
 {val_int}		{
 					if (define_flag && key_flag)
 					{
-						printf("An integer constant: %s\n", yytext);
 						add_int_to_dict(key_str, atol(yytext));
 						define_flag = FALSE;
 						key_flag = FALSE;
@@ -64,7 +62,6 @@ val_str			\".*\"
 						strncpy(val_string, &(yytext[1]), strlen(yytext)-2);
 						val_string[strlen(yytext)-2] = (char) 0;
 						add_str_to_dict(key_str, val_string);
-						printf("A string constant: %s on line %d\n", val_string, line_no);
 						define_flag = FALSE;
 						key_flag = FALSE; 
 					}
@@ -77,12 +74,16 @@ val_str			\".*\"
 
 %%
 main( int argc, char **argv )
-{
+{ 
     ++argv, --argc;     /* skip over program name */
     if ( argc > 0 )
+    {	
         yyin = fopen( argv[0], "r" );
+    }
     else
+    {	
         yyin = stdin;
-
+    }
+    init_dict();
     yylex();
 }
