@@ -1,3 +1,12 @@
+/*
+@author Christian Merchant
+@project: CSCE531 Project 1
+@date: 2015-02-13
+@version: 1.0
+@file: Header File 
+Header for Lexical analyzer
+*/
+
 #ifndef DEFS_H
 #define DEFS_H
 

@@ -1,3 +1,11 @@
+/*
+@author Christian Merchant
+@project: CSCE531 Project 1
+@date: 2015-02-13
+@version: 1.0
+@file: driver (lex file) 
+*/
+
 %{
 #include <math.h>
 #include <stdlib.h>
@@ -10,8 +18,8 @@ digit           [0-9]
 int             {digit}+
 directive       "#""define"[ \t]+
 identifier      [_A-Za-z][_A-Za-z0-9]*
-val_int		[+-]?{int}
-val_str		\".*\"
+val_int			[+-]?{int}
+val_str			\".*\"
 
 /* internal flag */
 	int define_flag = FALSE;
@@ -23,13 +31,12 @@ val_str		\".*\"
 
 	int line_no = 1;
 %%
-\n 				  ++line_no;
 {directive}   	{
 					define_flag = TRUE; 
 				}  
 {identifier}	{ 
-				        if (define_flag && !key_flag) /*key identifier*/
-				        {
+			        if (define_flag && !key_flag) /*key identifier*/
+			        {
 				   	 key_str = (char*)malloc(strlen(yytext)+1);
 				   	 strcpy(key_str,yytext); 	
 					 
@@ -42,7 +49,7 @@ val_str		\".*\"
 						key_flag = FALSE;
 					}
 					else
-					{
+					{	
 						output_substitution(yyout,yytext); 
 					}
 				 }					    
@@ -65,10 +72,8 @@ val_str		\".*\"
 						define_flag = FALSE;
 						key_flag = FALSE; 
 					}
-				}
-"{"[^}\n]*"}"    /* eat up one-line comments */
-
-
+				}	
+\n 				++line_no;					
 %%
 main( int argc, char **argv )
 { 

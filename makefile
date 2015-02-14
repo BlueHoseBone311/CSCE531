@@ -16,4 +16,4 @@ lex.yy.c: driver.lex defs.h
 	$(LEX) driver.lex  
 
 clean: 
-	rm *.o lex.yy.c babycpp test*.c *.txt *.i
+	rm *.o lex.yy.c babycpp 

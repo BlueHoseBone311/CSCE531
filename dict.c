@@ -84,11 +84,11 @@ void output_substitution(FILE *stream, const char *id)
     DR item = get_item(id);
     while (item != NULL && item->in_cycle == FALSE && item->tag == 2) 
     {
-	item = get_item(item->u.idval);
+	   item = get_item(item->u.idval);
     }
-    if (item == NULL|| item->in_cycle )
-    {
-	fprintf(stream, "%s", id);
+    if (item == NULL)
+    {  
+        fprintf(stream, "%s", id);  
     }
     else
     {    
@@ -116,7 +116,6 @@ static DR get_item(const char *key)
     int index = hash(key);
     DR p = hash_tab[index];
     debug1("get_item: p %s NULL\n", p==NULL?"==":"!=");
-    //printf("key:%s",key);
     while (p!=NULL && strcmp(key,p->key))
     {    
         p = p->next;
@@ -175,14 +174,14 @@ static void mark_cycle(DR item)
    DR temp = NULL; 
     while (p->tag == 2 && (temp = get_item(p->u.idval)) != NULL && !p->in_cycle && temp !=item)
     {
-	p = temp; 
+	   p = temp; 
     }
     if (temp == item)
     {
-	for (; item->in_cycle != TRUE; item = get_item(item->u.idval))
-	{
-		item->in_cycle = TRUE;
-	}
+    	for (; item->in_cycle != TRUE; item = get_item(item->u.idval))
+    	{
+    		item->in_cycle = TRUE;
+    	}
     }
 
 }
@@ -190,19 +189,19 @@ static void mark_cycle(DR item)
 // Unmark an existing cycle
 static void unmark_cycle(DR item)
 {
-   DR temp = item; 
-   while (temp != NULL)
+   DR entry = item; 
+   while (entry != NULL)
    { 
-      if (temp->in_cycle == TRUE)
+      if (entry->in_cycle == TRUE)
       {
-	temp ->in_cycle = FALSE;
-	if (temp->tag == 2)
+	entry ->in_cycle = FALSE;
+	if (entry->tag == 2)
 	{	
-		temp = get_item(temp->u.idval);
+		entry = get_item(entry->u.idval);
 	}
       }
        
-       if (!temp->in_cycle || temp->tag ==1 || temp->tag ==0)
+       if (!entry->in_cycle || entry->tag ==1 || entry->tag ==0)
        {
          break;
         }
@@ -214,7 +213,9 @@ static int hash(const char *key)
 {
     int sum = 0;
     for (; *key; key++)
+    {    
         sum = (37*sum + *key) % h_size;
+    }
     return sum;
 }
 
