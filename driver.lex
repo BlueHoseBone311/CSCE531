@@ -27,6 +27,8 @@ val_str			\".*\"
 
 /* key match storage */				
 	char * key_str;
+	char * val_id;
+	char * sub_id;  
 	char* val_string;
 
 	int line_no = 1;
@@ -44,21 +46,28 @@ val_str			\".*\"
 					}
 					else if (define_flag && key_flag) /*value identifier*/
 					{
-						add_id_to_dict(key_str, yytext);  
-						define_flag = FALSE;
+						val_id = (char*)malloc(strlen(yytext)+1);
+				   	    strcpy(val_id,yytext); 	
+						add_id_to_dict(key_str, val_id);  
+						
 						key_flag = FALSE;
 					}
 					else
 					{	
-						output_substitution(yyout,yytext); 
+						sub_id = (char*)malloc(strlen(yytext)+1);
+				   	    strcpy(sub_id,yytext); 	
+						output_substitution(yyout,sub_id); 
 					}
 				 }					    
 {val_int}		{
 					if (define_flag && key_flag)
 					{
 						add_int_to_dict(key_str, atol(yytext));
-						define_flag = FALSE;
 						key_flag = FALSE;
+					}
+					else
+					{
+						fprintf(yyout, "%s", yytext);
 					}
 				}
 
@@ -69,11 +78,27 @@ val_str			\".*\"
 						strncpy(val_string, &(yytext[1]), strlen(yytext)-2);
 						val_string[strlen(yytext)-2] = (char) 0;
 						add_str_to_dict(key_str, val_string);
-						define_flag = FALSE;
+						
 						key_flag = FALSE; 
 					}
+					else
+					{
+						fprintf(yyout,"%s",yytext);
+					}
 				}	
-\n 				++line_no;					
+\n 				{
+					if (define_flag) /*newline character on define line*/
+					{
+						define_flag = FALSE;
+						++line_no;
+					}
+					else
+					{
+						++line_no; 
+						fprintf(yyout,"%s",yytext);
+					} 
+				}
+									
 %%
 main( int argc, char **argv )
 { 
@@ -88,4 +113,7 @@ main( int argc, char **argv )
     }
     init_dict();
     yylex();
+    char* key = "SOME_ID";
+    DR item = get_item(key);
+    fprintf(yyout,"SOME_ID in dictionary: %s, with tag %d, and cycle status %d and id value %s\n",item->key,item->tag, item->in_cycle, item->u.idval);
 }

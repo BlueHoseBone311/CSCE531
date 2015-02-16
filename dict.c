@@ -13,7 +13,7 @@ A hash table "dictionary" implementation
 #define MAX_LOAD_FACTOR 2
 #define SCALE_FACTOR 2
 
-static DR get_item(const char *key);
+//static DR get_item(const char *key);
 static int insert_or_update(DR new_item);
 static void mark_cycle(DR item);
 static void unmark_cycle(DR item);
@@ -82,14 +82,18 @@ void add_id_to_dict(const char *key, const char *val)
 void output_substitution(FILE *stream, const char *id)
 {
     DR item = get_item(id);
-    while (item != NULL && item->in_cycle == FALSE && item->tag == 2) 
+    while (item !=NULL && item->in_cycle == FALSE && item->tag == 2) 
     {
 	   item = get_item(item->u.idval);
     }
     if (item == NULL)
-    {  
-        fprintf(stream, "%s", id);  
-    }
+    {
+        fprintf(stream, "%s", id);     
+    }    
+    else if (item->in_cycle)
+    {
+        fprintf(stream, "%s", item->key);
+    }    
     else
     {    
         switch(item->tag)
@@ -98,7 +102,7 @@ void output_substitution(FILE *stream, const char *id)
                 fprintf(stream,"%ld", item->u.intconstval);
                 break; 
             case 1:
-                fprintf(stream,"%s", item->u.strconstval);
+                fprintf(stream,"\"%s\"", item->u.strconstval);
                 break; 
             case 2:
                 fprintf(stream,"%s", item->u.idval);
@@ -111,7 +115,7 @@ void output_substitution(FILE *stream, const char *id)
 /* Local routines */
 
 /* Returns NULL if item not found */
-static DR get_item(const char *key)
+DR get_item(const char *key)
 {
     int index = hash(key);
     DR p = hash_tab[index];

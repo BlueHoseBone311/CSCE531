@@ -45,6 +45,7 @@ extern int line_no;
 
 void init_lex(FILE *stream);
 void init_dict();
+DR get_item(const char *key);
 void add_int_to_dict(const char *key, long val);
 void add_str_to_dict(const char *key, const char *val);
 void add_id_to_dict(const char *key, const char *val);
