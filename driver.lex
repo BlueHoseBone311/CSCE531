@@ -86,7 +86,7 @@ val_str			\".*\"
 						fprintf(yyout,"%s",yytext);
 					}
 				}	
-\n 				{
+\n        		{
 					if (define_flag) /*newline character on define line*/
 					{
 						define_flag = FALSE;
@@ -113,7 +113,4 @@ main( int argc, char **argv )
     }
     init_dict();
     yylex();
-    char* key = "SOME_ID";
-    DR item = get_item(key);
-    fprintf(yyout,"SOME_ID in dictionary: %s, with tag %d, and cycle status %d and id value %s\n",item->key,item->tag, item->in_cycle, item->u.idval);
 }
